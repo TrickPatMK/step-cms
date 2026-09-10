@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from './button'
 import { UploadCloud, X, Loader2 } from 'lucide-react'
 import imageCompression from 'browser-image-compression'
+import { api } from '@/lib/api'
 
 interface ImageUploadProps {
   value?: string
@@ -10,7 +11,9 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
-  const [preview, setPreview] = useState<string | null>(value || null)
+  const [localUrl, setLocalUrl] = useState<string | null>(null)
+
+  const preview = localUrl !== null ? localUrl : (value || null)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -27,37 +30,44 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
       }
       const compressedFile = await imageCompression(file, options)
 
-      // Upload logic (simulated for now, replace with actual API endpoint)
+      // Real API upload call
       const formData = new FormData()
       formData.append('file', compressedFile)
       
-      // Simulate API call
-      // const res = await api.post('/upload', formData)
-      // const imageUrl = res.data.url
+      const res = await api.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
       
-      // Temporary simulated URL using object URL
-      const temporaryUrl = URL.createObjectURL(compressedFile)
-      setPreview(temporaryUrl)
-      onChange(temporaryUrl) // Should be imageUrl from API
-      
-    } catch (error) {
+      const imageUrl = res.data?.url || ''
+      setLocalUrl(imageUrl)
+      onChange(imageUrl)
+    } catch (error: any) {
       console.error('Error uploading image:', error)
-      alert('Gagal mengupload gambar')
+      const message = error.response?.data?.message || 'Gagal mengupload gambar'
+      alert(message)
     } finally {
       setIsUploading(false)
     }
   }
 
   const handleRemove = () => {
-    setPreview(null)
+    setLocalUrl('')
     onChange('')
   }
+
+  const displayUrl = preview
+    ? (preview.startsWith('blob:') || preview.startsWith('http') || preview.startsWith('data:')
+        ? preview
+        : `http://localhost:8000${preview.startsWith('/') ? '' : '/'}${preview}`)
+    : ''
 
   return (
     <div className="space-y-4 w-full">
       {preview ? (
         <div className="relative rounded-md overflow-hidden border aspect-video max-w-sm">
-          <img src={preview} alt="Upload preview" className="object-cover w-full h-full" />
+          <img src={displayUrl} alt="Upload preview" className="object-cover w-full h-full" />
           <Button
             type="button"
             variant="destructive"

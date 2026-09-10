@@ -9,10 +9,11 @@ import { Button } from './button'
 import { 
   Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, 
   Heading2, Heading3, Link as LinkIcon, Image as ImageIcon, 
-  Quote, Code, AlignLeft, AlignCenter, AlignRight, AlignJustify
+  Quote, AlignLeft, AlignCenter, AlignRight, AlignJustify
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import imageCompression from 'browser-image-compression'
+import { api } from '@/lib/api'
 
 interface RichTextEditorProps {
   value: string
@@ -82,11 +83,20 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
       }
       const compressedFile = await imageCompression(file, options)
 
-      // Untuk sementara, kita menggunakan base64/ObjectURL
-      // Jika API sudah memiliki endpoint POST /upload, Anda bisa mengirim file ke sana dan mengambil URL-nya
-      const temporaryUrl = URL.createObjectURL(compressedFile)
+      const formData = new FormData()
+      formData.append('file', compressedFile)
+
+      let targetUrl = ''
+      try {
+        const res = await api.post('/api/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        targetUrl = res.data.url
+      } catch {
+        targetUrl = URL.createObjectURL(compressedFile)
+      }
       
-      editor.chain().focus().setImage({ src: temporaryUrl }).run()
+      editor.chain().focus().setImage({ src: targetUrl }).run()
     } catch (error) {
       console.error('Gagal mengupload/mengompres gambar:', error)
       alert('Gagal menyisipkan gambar ke dalam teks.')

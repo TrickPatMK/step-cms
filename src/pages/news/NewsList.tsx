@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Plus, Edit, Trash2, Loader2 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Plus, Edit, Trash2, Loader2, Search, Filter, MoreHorizontal, Newspaper } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import {
@@ -11,13 +12,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Card, CardContent } from '@/components/ui/card'
 
 interface News {
   id: number | string
   title: string
   publishedAt?: string
   status?: string
+  imageUrl?: string
+  category?: string
 }
 
 export default function NewsList() {
@@ -26,7 +35,6 @@ export default function NewsList() {
     queryFn: async () => {
       try {
         const response = await api.get('/api/stepnews')
-        // Mendukung berbagai format response API ({ data: [...] } atau [...])
         return (response.data.data || response.data) as News[]
       } catch (error) {
         console.error("Gagal mengambil data:", error)
@@ -36,69 +44,114 @@ export default function NewsList() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Manajemen Berita</h1>
-          <p className="text-slate-500 mt-1">Kelola publikasi artikel berita Anda di sini.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">Manajemen Berita</h1>
+          <p className="text-slate-500 mt-2 text-lg">Kelola dan publikasikan artikel, pengumuman, dan berita kampus.</p>
         </div>
         <Link to="/news/create">
-          <Button className="flex items-center gap-2">
-            <Plus size={16} /> Tambah Berita
+          <Button className="h-11 px-6 rounded-full font-bold bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 flex items-center gap-2 transition-all hover:scale-105">
+            <Plus size={18} /> Tulis Berita Baru
           </Button>
         </Link>
       </div>
       
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle>Daftar Artikel Berita</CardTitle>
-          <CardDescription>Semua berita yang telah dipublikasikan atau di-draft.</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Card className="border-none shadow-xl shadow-slate-200/40 rounded-2xl overflow-hidden bg-white">
+        {/* Table Toolbar */}
+        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 justify-between bg-slate-50/50">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Input 
+              placeholder="Cari judul berita..." 
+              className="pl-10 h-11 bg-white border-slate-200 rounded-xl focus-visible:ring-indigo-500"
+            />
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="h-11 rounded-xl border-slate-200 text-slate-600 font-medium flex items-center gap-2">
+              <Filter size={16} /> Filter Kategori
+            </Button>
+          </div>
+        </div>
+
+        <CardContent className="p-0">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-              <Loader2 className="animate-spin mb-4" size={32} />
-              <p>Mengambil data dari API...</p>
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+              <Loader2 className="animate-spin mb-4 text-indigo-500" size={40} />
+              <p className="font-medium text-lg text-slate-500">Memuat data artikel...</p>
             </div>
           ) : isError ? (
-            <div className="text-center py-12 bg-red-50 rounded-md border border-red-100 text-red-600">
-              <p className="font-semibold">Gagal mengambil data berita dari API.</p>
-              <p className="text-sm mt-1">Pastikan API server (Fastify) sedang berjalan di localhost:3000.</p>
+            <div className="text-center py-20 bg-red-50/50">
+              <div className="inline-flex w-16 h-16 rounded-full bg-red-100 items-center justify-center mb-4">
+                <Trash2 className="text-red-500" size={24} />
+              </div>
+              <p className="font-bold text-xl text-red-700">Koneksi API Gagal</p>
+              <p className="text-red-500/80 mt-2 max-w-md mx-auto">Pastikan API server sedang berjalan dan terhubung dengan benar ke database.</p>
             </div>
           ) : news && news.length > 0 ? (
-            <div className="border rounded-md">
+            <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-slate-50">
-                  <TableRow>
-                    <TableHead>Judul Berita</TableHead>
-                    <TableHead>Tanggal</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Aksi</TableHead>
+                <TableHeader>
+                  <TableRow className="bg-slate-50/80 hover:bg-slate-50/80 border-b-slate-200">
+                    <TableHead className="font-bold text-slate-600 py-5 px-6">Informasi Artikel</TableHead>
+                    <TableHead className="font-bold text-slate-600">Kategori</TableHead>
+                    <TableHead className="font-bold text-slate-600">Tanggal Rilis</TableHead>
+                    <TableHead className="font-bold text-slate-600">Status</TableHead>
+                    <TableHead className="text-right font-bold text-slate-600 px-6">Opsi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {news.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.title}</TableCell>
-                      <TableCell className="text-slate-500">
-                        {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('id-ID') : '-'}
+                    <TableRow key={item.id} className="hover:bg-slate-50/60 transition-colors border-b-slate-100 group">
+                      <TableCell className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-12 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0">
+                            {item.imageUrl ? (
+                              <img src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:8000${item.imageUrl}`} alt="cover" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                <Newspaper size={20} />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-800 text-base leading-tight mb-1 group-hover:text-indigo-600 transition-colors">{item.title}</p>
+                            <p className="text-xs text-slate-400 font-medium">ID: {String(item.id).substring(0, 8)}...</p>
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
-                        <span className="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                        <span className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-md border border-slate-200">
+                          {item.category || 'Umum'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-slate-500 font-medium">
+                        {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-full">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                           {item.status || 'Published'}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Link to={`/news/edit/${item.id}`}>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                              <Edit size={14} />
+                      <TableCell className="text-right px-6">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700 rounded-lg">
+                              <MoreHorizontal size={18} />
                             </Button>
-                          </Link>
-                          <Button variant="destructive" size="sm" className="h-8 w-8 p-0">
-                            <Trash2 size={14} />
-                          </Button>
-                        </div>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40 rounded-xl">
+                            <Link to={`/news/edit/${item.id}`}>
+                              <DropdownMenuItem className="cursor-pointer font-medium text-slate-600">
+                                <Edit className="mr-2 h-4 w-4 text-slate-400" /> Edit Artikel
+                              </DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuItem className="cursor-pointer font-medium text-red-600 focus:text-red-700 focus:bg-red-50 mt-1">
+                              <Trash2 className="mr-2 h-4 w-4" /> Hapus
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -106,10 +159,14 @@ export default function NewsList() {
               </Table>
             </div>
           ) : (
-            <div className="text-center text-slate-500 py-16 border-2 border-dashed rounded-md bg-slate-50/50">
-              <p className="mb-4">Belum ada berita yang ditemukan.</p>
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                <Newspaper className="text-slate-300" size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Belum Ada Berita</h3>
+              <p className="text-slate-500 max-w-sm mb-6">Portal berita Anda masih kosong. Mulailah dengan menulis artikel atau pengumuman pertama Anda.</p>
               <Link to="/news/create">
-                <Button variant="outline">Buat Berita Pertama</Button>
+                <Button className="rounded-full bg-indigo-600 hover:bg-indigo-700 font-semibold px-6">Tulis Artikel Baru</Button>
               </Link>
             </div>
           )}

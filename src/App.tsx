@@ -5,6 +5,10 @@ import NewsList from '@/pages/news/NewsList'
 import NewsForm from '@/pages/news/NewsForm'
 import EventsList from '@/pages/events/EventsList'
 import EventsForm from '@/pages/events/EventsForm'
+import FacultyList from '@/pages/faculty/FacultyList'
+import FacultyForm from '@/pages/faculty/FacultyForm'
+import FacilitiesList from '@/pages/facilities/FacilitiesList'
+import FacilitiesForm from '@/pages/facilities/FacilitiesForm'
 import Login from '@/pages/Login'
 
 function App() {
@@ -19,6 +23,12 @@ function App() {
         <Route path="events" element={<EventsList />} />
         <Route path="events/create" element={<EventsForm />} />
         <Route path="events/edit/:id" element={<EventsForm />} />
+        <Route path="faculty" element={<FacultyList />} />
+        <Route path="faculty/create" element={<FacultyForm />} />
+        <Route path="faculty/edit/:id" element={<FacultyForm />} />
+        <Route path="facilities" element={<FacilitiesList />} />
+        <Route path="facilities/create" element={<FacilitiesForm />} />
+        <Route path="facilities/edit/:id" element={<FacilitiesForm />} />
       </Route>
     </Routes>
   )
