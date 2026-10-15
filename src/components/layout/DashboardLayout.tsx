@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Building2, LogOut, Menu } from 'lucide-react'
+import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Building2, LogOut, Menu, Receipt, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth, useNotice } from '@/lib/contexts'
 import { errorMessage } from '@/lib/errors'
@@ -11,6 +11,8 @@ const menu = [
   { name: 'Event', path: '/events', icon: Calendar },
   { name: 'Dosen & Staf', path: '/faculty', icon: GraduationCap },
   { name: 'Fasilitas Kampus', path: '/facilities', icon: Building2 },
+  { name: 'Pengajuan Dana', path: '/pengajuan', icon: Receipt },
+  { name: 'Kewajiban LPJ', path: '/pengajuan/peringatan', icon: AlertCircle },
 ]
 
 export default function DashboardLayout() {

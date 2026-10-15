@@ -9,6 +9,10 @@ import FacultyList from '@/pages/faculty/FacultyList'
 import FacultyForm from '@/pages/faculty/FacultyForm'
 import FacilitiesList from '@/pages/facilities/FacilitiesList'
 import FacilitiesForm from '@/pages/facilities/FacilitiesForm'
+import PengajuanList from '@/pages/pengajuan/PengajuanList'
+import PengajuanDetail from '@/pages/pengajuan/PengajuanDetail'
+import PengajuanForm from '@/pages/pengajuan/PengajuanForm'
+import PengajuanPeringatan from '@/pages/pengajuan/PengajuanPeringatan'
 import Login from '@/pages/Login'
 import { RequireAdmin } from '@/components/auth-provider'
 
@@ -31,6 +35,11 @@ function App() {
         <Route path="facilities" element={<FacilitiesList />} />
         <Route path="facilities/create" element={<FacilitiesForm />} />
         <Route path="facilities/edit/:id" element={<FacilitiesForm />} />
+        <Route path="pengajuan" element={<PengajuanList />} />
+        <Route path="pengajuan/create" element={<PengajuanForm />} />
+        <Route path="pengajuan/edit/:id" element={<PengajuanForm />} />
+        <Route path="pengajuan/peringatan" element={<PengajuanPeringatan />} />
+        <Route path="pengajuan/:id" element={<PengajuanDetail />} />
       </Route>
       </Route>
       <Route path="*" element={<div className="p-8"><h1>Halaman tidak ditemukan</h1><a href="/">Kembali ke dashboard</a></div>} />
