@@ -36,8 +36,8 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">STEP CMS Login</CardTitle>
-          <CardDescription>Masukkan email dan password Anda</CardDescription>
+          <CardTitle className="text-2xl">Masuk ke STEP CMS</CardTitle>
+          <CardDescription>Masukkan email dan kata sandi Anda</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
@@ -53,7 +53,7 @@ export default function Login() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata Sandi</Label>
               <Input
                 id="password"
                 type="password"
@@ -65,7 +65,7 @@ export default function Login() {
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? 'Memproses...' : 'Masuk'}
             </Button>
           </CardFooter>
         </form>

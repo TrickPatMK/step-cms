@@ -427,7 +427,7 @@ describe('Modul Pengajuan Dana & LPJ', () => {
     window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
 
     await waitFor(() => {
-      expect(screen.getByText('STEP CMS Login')).toBeInTheDocument()
+      expect(screen.getByText('Masuk ke STEP CMS')).toBeInTheDocument()
       expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
     })
   })
