@@ -293,7 +293,7 @@ export default function PengajuanDetail() {
 
       {/* 3 Status Terpisah (Proposal, Dana, LPJ) */}
       <div>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Status Pengajuan (3 Bagian Terpisah)</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Status Pengajuan</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Status 1: Proposal */}
           <Card className="rounded-2xl border-slate-200">
@@ -355,7 +355,7 @@ export default function PengajuanDetail() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-indigo-950">Aksi Status Saat Ini</h3>
-            <p className="text-xs text-indigo-700">Tombol aksi status sesuai aturan transisi resmi (POST /api/pengajuan/:id/aksi).</p>
+            <p className="text-xs text-indigo-700">Pilih aksi yang sesuai dengan keadaan pengajuan saat ini.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {validActions.length === 0 ? (

@@ -13,6 +13,7 @@ import PengajuanForm from '@/pages/pengajuan/PengajuanForm'
 import PengajuanPeringatan from '@/pages/pengajuan/PengajuanPeringatan'
 import Login from '@/pages/Login'
 import type { Pengajuan, PengajuanDetail as PengajuanDetailType, PengajuanPeringatanItem } from '@/lib/pengajuan'
+import { getValidActions } from '@/lib/pengajuan'
 
 const { signOut } = vi.hoisted(() => ({ signOut: vi.fn() }))
 vi.mock('@/lib/auth', () => ({ authClient: { signOut } }))
@@ -445,5 +446,26 @@ describe('Modul Pengajuan Dana & LPJ', () => {
 
     expect(await screen.findByText('Akses ditolak. Anda tidak memiliki izin untuk tindakan ini.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Coba lagi/i })).toBeInTheDocument()
+  })
+})
+
+describe('Pemilihan aksi yang sah', () => {
+  const dasar = {
+    statusProposal: 'disetujui',
+    statusDana: 'belum_dicairkan',
+    statusLpj: 'belum_ada',
+  } as Pengajuan
+
+  it('menawarkan pencairan selama dana belum dicairkan penuh', () => {
+    expect(getValidActions({ ...dasar, statusDana: 'belum_dicairkan' })).toContain('cairkan')
+    expect(getValidActions({ ...dasar, statusDana: 'sebagian' })).toContain('cairkan')
+  })
+
+  it('tidak menawarkan pencairan setelah dana dicairkan penuh', () => {
+    expect(getValidActions({ ...dasar, statusDana: 'dicairkan' })).not.toContain('cairkan')
+  })
+
+  it('tidak menawarkan perubahan tenggat setelah LPJ diterima', () => {
+    expect(getValidActions({ ...dasar, statusLpj: 'diterima' })).not.toContain('ubah_tenggat')
   })
 })

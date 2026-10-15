@@ -256,8 +256,8 @@ export function getValidActions(pengajuan: Pengajuan): AksiType[] {
     actions.push('setujui', 'minta_revisi', 'tolak')
   }
 
-  // Dana transitions
-  if (pengajuan.statusProposal === 'disetujui') {
+  // Dana transitions: pencairan penuh sudah selesai tidak ditawarkan lagi
+  if (pengajuan.statusProposal === 'disetujui' && pengajuan.statusDana !== 'dicairkan') {
     actions.push('cairkan')
   }
 
