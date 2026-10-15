@@ -10,11 +10,13 @@ import FacultyForm from '@/pages/faculty/FacultyForm'
 import FacilitiesList from '@/pages/facilities/FacilitiesList'
 import FacilitiesForm from '@/pages/facilities/FacilitiesForm'
 import Login from '@/pages/Login'
+import { RequireAdmin } from '@/components/auth-provider'
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route element={<RequireAdmin />}>
       <Route path="/" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="news" element={<NewsList />} />
@@ -30,6 +32,8 @@ function App() {
         <Route path="facilities/create" element={<FacilitiesForm />} />
         <Route path="facilities/edit/:id" element={<FacilitiesForm />} />
       </Route>
+      </Route>
+      <Route path="*" element={<div className="p-8"><h1>Halaman tidak ditemukan</h1><a href="/">Kembali ke dashboard</a></div>} />
     </Routes>
   )
 }

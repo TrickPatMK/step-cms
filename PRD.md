@@ -1,55 +1,47 @@
-# Product Requirements Document (PRD) & Perencanaan: STEP CMS
+# PRD STEP-CMS — stabilisasi empat modul
 
-## 1. Tujuan Produk
-Membangun sebuah *Content Management System* (CMS) berbasis *Client-Side Rendering* (CSR) menggunakan **React + Vite** yang bertugas untuk mengelola konten **Berita (News)** dan **Event (Agenda)** pada ekosistem STEP. CMS ini dirancang sebagai aplikasi *dashboard* bagi administrator untuk memasukkan data yang nantinya akan dikonsumsi oleh aplikasi klien publik.
+## Tujuan
 
-## 2. Arsitektur & Tech Stack
-- **Frontend Framework:** React 18 dengan Vite (TypeScript).
-- **Styling:** Tailwind CSS v3 & Shadcn UI (Radix UI).
-- **State Management & Fetching:** TanStack Query (React Query) & Axios.
-- **Form & Validasi:** React Hook Form & Zod.
-- **Rich Text Editor:** Tiptap (dengan ekstensi komprehensif).
-- **Autentikasi:** API Better-Auth (Token Bearer JWT disimpan di `localStorage`).
-- **Target API Utama:** `http://localhost:8000` (Fastify Server).
+Administrator STEP Foundation dapat mengelola Berita, Event, Dosen/Staf, dan Fasilitas dengan data yang konsisten terhadap STEP-API. React 19 + Vite menyediakan dashboard; STEP-API menjadi sumber kontrak dan penyimpanan.
 
----
+## Status implementasi
 
-## 3. Laporan Kemajuan Saat Ini (*Progress Report*)
+| Area | Implementasi |
+| --- | --- |
+| Akses admin | Guard sesi server, role admin, loading/error/retry, penanganan 401 dan 403 terpisah, logout membersihkan token/cache |
+| Berita | List/create/edit/delete, dialog konfirmasi, pencarian judul, filter kategori; backend PUT/DELETE ditambahkan |
+| Event | CRUD, status enum, validasi rentang waktu; dateEnd kosong memakai dateStart |
+| Dosen/Staf | CRUD untuk field API; order dipertahankan, kategori/NIP/alias yang tidak didukung dihapus |
+| Fasilitas | CRUD untuk field API; input/kolom urutan yang tidak disimpan dihapus |
+| Upload/editor | JPEG/PNG/WebP, kompresi, URL permanen, simpan menunggu upload; tidak ada fallback blob |
+| Dashboard | Total empat modul dari API; kegagalan request tampil sebagai error, indikator statis dihapus |
+| API Berita | Sanitasi create/update bersama, transaksi hapus komentar/interaksi/artikel, webhook revalidasi setelah sukses |
+| Pengujian | Suite CMS untuk kontrak, auth, CRUD/cache, tanggal, upload, editor; suite API diperluas untuk Berita |
+| Dokumentasi | README konfigurasi lokal/hosting/kontrak/tes; .env.example; API_DOCS.md diperbarui |
 
-Tabel di bawah ini merepresentasikan status terkini dari pengembangan aplikasi kita:
+Status di atas menjelaskan implementasi kode, bukan klaim bahwa smoke test MySQL/hosting telah selesai. Laporan lama “50% selesai” tidak digunakan karena tidak memiliki kriteria penerimaan yang terukur.
 
-| Fitur / Modul | Status | Keterangan / Catatan |
-| :--- | :---: | :--- |
-| **Inisialisasi Proyek** | ✅ Selesai | Konfigurasi React, Vite, TS, dan Tailwind CSS telah stabil. |
-| **Konfigurasi API & Proxy** | ✅ Selesai | Menggunakan Vite Proxy (`/api` -> `localhost:8000`) untuk mem-Bypass CORS *local development*. |
-| **Sistem Autentikasi (Login)** | ✅ Selesai | Login Admin via email/password. Token diekstrak dan disuntikkan secara otomatis via *Axios Interceptors*. |
-| **Layout Dashboard Utama** | ✅ Selesai | Desain sidebar navigasi modern, dan _metric card_ yang mengambil data real-time (contoh: Total Berita). |
-| **Modul Berita: Read (List)** | ✅ Selesai | Tabel berita elegan dengan *fetching* data dari `GET /api/stepnews`. |
-| **Modul Berita: Create & Edit** | ✅ Selesai | Form interaktif menggunakan Zod. Jika mode edit, data berita (*termasuk format HTML*) dimuat kembali secara reaktif ke Tiptap. |
-| **Rich Text Editor (Tiptap)** | ✅ Selesai | Fitur teks lengkap (Bold, Italic, Rata paragraf, Link) + **Upload Gambar di dalam teks**. |
-| **Client-Side Image Compression** | ✅ Selesai | Fungsi kompresi gambar (maksimal 1MB) sebelum gambar diserahkan ke API (menghemat *bandwidth* server). |
+## Kriteria penerimaan
 
----
+1. Build, lint, dan tes CMS/API berhasil.
+2. URL privat hanya dapat diakses sesi admin; 401 membersihkan sesi/cache, 403 mempertahankan sesi valid.
+3. CRUD empat modul mengirim field yang didukung dan menyegarkan daftar/detail/dashboard.
+4. Upload gagal tidak menyimpan URL sementara; gambar permanen tetap terbaca setelah reload.
+5. Format Berita yang didukung bertahan setelah simpan/edit; HTML berbahaya dibuang oleh API.
+6. Hapus Berita menghapus relasinya dalam transaksi dan rollback saat terjadi kegagalan.
+7. Smoke test terhadap MySQL khusus pengujian dan pemeriksaan browser akhir berhasil sebelum dinyatakan siap operasional.
 
-## 4. Perencanaan Selanjutnya (*Next Steps*)
+## Keputusan milestone
 
-Berikut adalah langkah-langkah yang harus kita kerjakan selanjutnya untuk merampungkan ekosistem ini:
+- Mengikuti schema STEP-API yang tersedia; tidak ada migrasi database baru.
+- Menambahkan PUT/DELETE Berita tanpa mengubah bentuk GET list/detail.
+- Mempertahankan stack dan session token Bearer.
+- Tidak menambah user/dokumen, analytics, deployment aktual, atau integrasi halaman publik Event/Dosen/Fasilitas.
 
-### Tahap 1: Persiapan API Tambahan (Backend)
-Berdasarkan investigasi sebelumnya, ada beberapa API yang **belum tersedia** di sisi Fastify backend dan harus kita lengkapi terlebih dahulu:
-1. **API Upload Gambar (`POST /api/upload`):** Saat ini CMS hanya mengompres gambar dan menampilkannya sebagai *blob local*. Kita butuh *endpoint* API untuk menerima file gambar dan mengembalikan URL permanen (misalnya `/public/uploads/gambar.jpg`).
-2. **API Modul Event (`/api/events`):** Skema *database* (Drizzle) dan *routing* untuk Event/Agenda belum ada di *backend* API. Kita perlu merancangnya di backend.
+## Berikutnya
 
-### Tahap 2: Modul Event (CMS Frontend)
-Setelah API Event siap, kita akan membangun antarmuka di CMS:
-1. **Halaman Event List:** Menampilkan tabel jadwal kegiatan.
-2. **Form Event (Create/Edit):** Mirip dengan form berita, namun dilengkapi input Kalender (Date Picker) untuk tanggal pelaksanaan, lokasi event, dan status (Selesai/Akan Datang).
+Jalankan smoke test saat konfigurasi database pengujian tersedia, validasi browser bersama API hidup, kemudian tentukan milestone pemetaan data Event/Dosen/Fasilitas ke website publik. Modul user/dokumen dan analytics dikerjakan setelah kebutuhan produk disepakati.
 
-### Tahap 3: Finalisasi & Keamanan
-1. **Route Protection (Frontend):** Melindungi halaman-halaman di CMS agar me-*redirect* pengguna kembali ke halaman `/login` jika token di `localStorage` kosong atau kadaluwarsa.
-2. **Error Handling API:** Menangani respons API seperti token expired (`401 Unauthorized`) dengan rapi menggunakan Notifikasi (*Toast*).
+## Verifikasi 9 Oktober 2026
 
----
-
-## 5. Ringkasan
-Aplikasi CMS ini sudah di tahap **50% selesai** (Modul Berita sepenuhnya rampung di sisi UI & Logika). Sisa pekerjaan utama difokuskan pada sinkronisasi *endpoint* tambahan di API dan pembangunan antarmuka modul Event.
+Build/lint CMS dan type-check API berhasil. Suite otomatis CMS berisi 47 tes, API 20 tes. Audit dependensi CMS tersisa 7 temuan pada rantai Tailwind v3 setelah pembaruan kompatibel; migrasi Tailwind v4 menjadi pekerjaan lanjutan sebelum rilis. Smoke test MySQL dan browser dengan API hidup masih tertunda karena database khusus pengujian belum tersedia.

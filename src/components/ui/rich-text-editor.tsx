@@ -1,9 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
-import Underline from '@tiptap/extension-underline'
-import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
 import { Button } from './button'
 import { 
@@ -12,8 +10,9 @@ import {
   Quote, AlignLeft, AlignCenter, AlignRight, AlignJustify
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import imageCompression from 'browser-image-compression'
-import { api } from '@/lib/api'
+import { IMAGE_ACCEPT, imageUrl, uploadImage, editorImageUrls } from '@/lib/images'
+import { useUploads, useNotice } from '@/lib/contexts'
+import { errorMessage } from '@/lib/errors'
 
 interface RichTextEditorProps {
   value: string
@@ -22,25 +21,27 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const uploads = useUploads()
+  const notice = useNotice()
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ link: { openOnClick: false } }),
       Image.configure({
         inline: true,
-        allowBase64: true,
-      }),
-      Underline,
-      Link.configure({
-        openOnClick: false,
+        allowBase64: false,
       }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
     ],
-    content: value,
+    content: editorImageUrls(value),
     editorProps: {
       attributes: {
+        role: 'textbox',
+        'aria-label': 'Konten Berita',
+        'aria-multiline': 'true',
         class: 'prose prose-sm sm:prose lg:prose-lg mx-auto focus:outline-none min-h-[300px] p-4 max-w-none',
       },
     },
@@ -50,8 +51,9 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   })
 
   useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value)
+    const html = editorImageUrls(value)
+    if (editor && html !== editor.getHTML()) {
+      editor.commands.setContent(html, { emitUpdate: false })
     }
   }, [value, editor])
 
@@ -71,39 +73,20 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const input = e.currentTarget
+    const file = input.files?.[0]
     if (!file) return
-
+    const finish = uploads.begin()
+    setIsUploading(true)
     try {
-      // Kompres gambar
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1200,
-        useWebWorker: true,
-      }
-      const compressedFile = await imageCompression(file, options)
-
-      const formData = new FormData()
-      formData.append('file', compressedFile)
-
-      let targetUrl = ''
-      try {
-        const res = await api.post('/api/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
-        targetUrl = res.data.url
-      } catch {
-        targetUrl = URL.createObjectURL(compressedFile)
-      }
-      
-      editor.chain().focus().setImage({ src: targetUrl }).run()
+      const targetUrl = imageUrl(await uploadImage(file))
+      if (!editor.isDestroyed) editor.chain().focus().setImage({ src: targetUrl }).run()
     } catch (error) {
-      console.error('Gagal mengupload/mengompres gambar:', error)
-      alert('Gagal menyisipkan gambar ke dalam teks.')
+      notice(errorMessage(error), 'error')
     } finally {
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
+      finish()
+      setIsUploading(false)
+      input.value = ''
     }
   }
 
@@ -234,13 +217,15 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
             type="button" variant="ghost" size="sm"
             onClick={() => fileInputRef.current?.click()}
             title="Insert Image"
+            disabled={isUploading}
             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
           >
             <ImageIcon size={16} />
           </Button>
           <input
             type="file"
-            accept="image/*"
+            accept={IMAGE_ACCEPT}
+            disabled={isUploading}
             ref={fileInputRef}
             onChange={handleImageUpload}
             className="hidden"

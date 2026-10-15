@@ -1,0 +1,13 @@
+import path from 'node:path'
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: { alias: { '@': path.resolve(import.meta.dirname, './src') } },
+  test: {
+    environment: 'jsdom', setupFiles: ['./src/test/setup.ts'], clearMocks: true, restoreMocks: true,
+    // jsdom owns browser storage; Node 26's native getter otherwise shadows it.
+    execArgv: ['--no-experimental-webstorage'],
+  },
+})

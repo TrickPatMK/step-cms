@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '@/lib/api'
+import { useAuth } from '@/lib/contexts'
+import { errorMessage } from '@/lib/errors'
+import { Navigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -8,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 
 export default function Login() {
   const navigate = useNavigate()
+  const auth = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -19,25 +22,16 @@ export default function Login() {
     setError('')
 
     try {
-      const res = await api.post('/api/auth/sign-in/email', {
-        email,
-        password,
-      })
-
-      if (res.data?.token) {
-        localStorage.setItem('step_api_token', res.data.token)
-        navigate('/')
-      } else {
-        setError('Login berhasil tetapi token tidak ditemukan.')
-      }
-    } catch (err: any) {
-      console.error(err)
-      setError(err.response?.data?.message || err.response?.data?.error || 'Login gagal. Periksa kembali kredensial Anda.')
+      await auth.login(email, password)
+      navigate('/', { replace: true })
+    } catch (err: unknown) {
+      setError(errorMessage(err))
     } finally {
       setLoading(false)
     }
   }
 
+  if (auth.user) return <Navigate to="/" replace />
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <Card className="w-full max-w-md">
