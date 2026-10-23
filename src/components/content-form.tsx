@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { contentApi, contentKey, contentMeta, detailKey, type Entity } from '@/lib/content'
 import { editorDefaults, editorPayload, editorSchema, type EditorField, type EditorValues } from '@/lib/editor'
 import { errorMessage } from '@/lib/errors'
@@ -48,23 +49,29 @@ function EditorForm({ entity }: { entity: Entity }) {
   if (id && detail.isError) return <ErrorState message={errorMessage(detail.error)} retry={() => { void detail.refetch() }} />
   const disabled = save.isPending || uploads.pending > 0
   return <div className="mx-auto max-w-5xl space-y-6">
-    <div className="flex flex-wrap items-center gap-4"><Link to={`/${entity}`} className="text-indigo-600 hover:underline">Kembali ke daftar</Link><h1 className="text-3xl font-bold">{id ? 'Edit' : 'Tambah'} {meta.label}</h1></div>
-    <Card className="rounded-2xl"><CardContent className="p-6">
+    <div className="space-y-2">
+      <Link to={`/${entity}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-gold-700 hover:text-gold-600 hover:underline">
+        <ArrowLeft size={16} />
+        Kembali ke daftar
+      </Link>
+      <h1 className="text-3xl font-bold text-navy-950">{id ? 'Edit' : 'Tambah'} {meta.label}</h1>
+    </div>
+    <Card className="rounded-xl border-slate-200"><CardContent className="p-6">
       <form noValidate onSubmit={form.handleSubmit(values => { if (!uploads.pending && !save.isPending) save.mutate(values) })} className="space-y-6">
         <fieldset disabled={save.isPending} className="grid min-w-0 gap-5 sm:grid-cols-2">
           {fields[entity].map(field => <div key={field.name} className={field.type === 'textarea' ? 'space-y-2 sm:col-span-2' : 'space-y-2'}>
-            <label htmlFor={field.name} className="block text-sm font-semibold">{field.label}</label>
+            <label htmlFor={field.name} className="block text-sm font-semibold text-navy-950">{field.label}</label>
             {field.type === 'textarea' ? <Textarea id={field.name} rows={5} aria-invalid={!!form.formState.errors[field.name]} aria-describedby={`${field.name}-error`} {...form.register(field.name)} /> : <Input id={field.name} type={field.type || 'text'} step={field.type === 'number' ? 1 : undefined} min={field.type === 'number' ? 0 : undefined} aria-invalid={!!form.formState.errors[field.name]} aria-describedby={`${field.name}-error`} {...form.register(field.name)} />}
-            {form.formState.errors[field.name] && <p id={`${field.name}-error`} role="alert" className="text-sm text-red-600">{form.formState.errors[field.name]?.message}</p>}
+            {form.formState.errors[field.name] && <p id={`${field.name}-error`} role="alert" className="mt-1.5 text-xs font-medium text-red-600">{form.formState.errors[field.name]?.message}</p>}
           </div>)}
-          {(entity === 'events' || entity === 'facilities') && <div className="space-y-2"><label htmlFor="status" className="block text-sm font-semibold">Status</label><Select id="status" {...form.register('status')}>
+          {(entity === 'events' || entity === 'facilities') && <div className="space-y-2"><label htmlFor="status" className="block text-sm font-semibold text-navy-950">Status</label><Select id="status" {...form.register('status')}>
             {(entity === 'events' ? ['draft', 'published', 'archived'] : ['available', 'maintenance', 'closed']).map(status => <option key={status} value={status}>{status}</option>)}
-          </Select>{form.formState.errors.status && <p role="alert" className="text-sm text-red-600">{form.formState.errors.status.message}</p>}</div>}
-          {entity === 'news' && <div className="space-y-2 sm:col-span-2"><label className="block text-sm font-semibold">Konten Berita</label><Controller control={form.control} name="content" render={({ field }) => <RichTextEditor value={field.value} onChange={field.onChange} />} />{form.formState.errors.content && <p role="alert" className="text-sm text-red-600">{form.formState.errors.content.message}</p>}</div>}
-          <div className="space-y-2 sm:col-span-2"><p className="text-sm font-semibold">{entity === 'faculty' ? 'Foto profil' : entity === 'events' ? 'Flyer' : 'Gambar'}</p><Controller control={form.control} name={meta.image} render={({ field }) => <ImageUpload value={field.value} onChange={field.onChange} />} /></div>
+          </Select>{form.formState.errors.status && <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">{form.formState.errors.status.message}</p>}</div>}
+          {entity === 'news' && <div className="space-y-2 sm:col-span-2"><label className="block text-sm font-semibold text-navy-950">Konten Berita</label><Controller control={form.control} name="content" render={({ field }) => <RichTextEditor value={field.value} onChange={field.onChange} />} />{form.formState.errors.content && <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">{form.formState.errors.content.message}</p>}</div>}
+          <div className="space-y-2 sm:col-span-2"><p className="text-sm font-semibold text-navy-950">{entity === 'faculty' ? 'Foto profil' : entity === 'events' ? 'Flyer' : 'Gambar'}</p><Controller control={form.control} name={meta.image} render={({ field }) => <ImageUpload value={field.value} onChange={field.onChange} />} /></div>
         </fieldset>
-        {save.isError && <p role="alert" className="text-red-600">{errorMessage(save.error)}</p>}
-        <Button className="bg-indigo-600 hover:bg-indigo-700" type="submit" disabled={disabled}>{uploads.pending ? 'Menunggu upload...' : save.isPending ? 'Menyimpan...' : 'Simpan'}</Button>
+        {save.isError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600">{errorMessage(save.error)}</p>}
+        <Button variant="gold" type="submit" disabled={disabled}>{uploads.pending ? 'Menunggu upload...' : save.isPending ? 'Menyimpan...' : 'Simpan'}</Button>
       </form>
     </CardContent></Card>
   </div>

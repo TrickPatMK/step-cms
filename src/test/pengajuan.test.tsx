@@ -236,10 +236,10 @@ describe('Modul Pengajuan Dana & LPJ', () => {
     expect((await screen.findAllByText('001/IT/STEP/2026')).length).toBeGreaterThan(0)
     expect(screen.getByText('Pengadaan SSD PC BAAK dan Webcam Kantor')).toBeInTheDocument()
 
-    // 3 Status terpisah
-    expect(screen.getByText('1. Status Proposal')).toBeInTheDocument()
-    expect(screen.getByText('2. Status Dana')).toBeInTheDocument()
-    expect(screen.getByText('3. Status LPJ')).toBeInTheDocument()
+    // 3 Status terpisah (tanpa penomoran dekoratif sesuai disiplin anti-slop)
+    expect(screen.getByText('Status Proposal')).toBeInTheDocument()
+    expect(screen.getByText('Status Dana')).toBeInTheDocument()
+    expect(screen.getByText('Status LPJ')).toBeInTheDocument()
 
     // Ringkasan Keuangan
     expect(screen.getByText('Estimasi Biaya')).toBeInTheDocument()
@@ -294,6 +294,7 @@ describe('Modul Pengajuan Dana & LPJ', () => {
 
   // 5. Form create & edit: status tidak boleh diubah dari form
   it('Form pengajuan tidak menyediakan field ubah status dan mengirim payload bersih', async () => {
+    const user = userEvent.setup({ delay: null })
     const postSpy = vi.spyOn(api, 'post').mockResolvedValue({ data: { data: mockPengajuanList[1], message: 'Created' } })
 
     renderWithProviders('/pengajuan/create')
@@ -304,16 +305,16 @@ describe('Modul Pengajuan Dana & LPJ', () => {
     expect(screen.queryByLabelText(/Status LPJ/i)).not.toBeInTheDocument()
 
     // Isi formulir
-    await userEvent.type(screen.getByLabelText(/Nomor Pengajuan/i), '010/BAAK/2026')
-    await userEvent.type(screen.getByLabelText(/Judul Pengajuan/i), 'Pengadaan Meja Rapat')
-    await userEvent.type(screen.getByLabelText(/Unit Pengaju/i), 'BAAK')
-    await userEvent.type(screen.getByLabelText(/Nama Pengaju/i), 'Ahmad Fauzi')
-    await userEvent.type(screen.getByLabelText(/Estimasi Biaya Total/i), '2500000')
+    await user.type(screen.getByLabelText(/Nomor Pengajuan/i), '010/BAAK/2026')
+    await user.type(screen.getByLabelText(/Judul Pengajuan/i), 'Pengadaan Meja Rapat')
+    await user.type(screen.getByLabelText(/Unit Pengaju/i), 'BAAK')
+    await user.type(screen.getByLabelText(/Nama Pengaju/i), 'Ahmad Fauzi')
+    await user.type(screen.getByLabelText(/Estimasi Biaya Total/i), '2500000')
 
-    await userEvent.click(screen.getByRole('button', { name: /Tambah Baris Pos/i }))
-    await userEvent.type(screen.getByLabelText(/Uraian pos 1/i), 'Meja Rapat Kayu')
+    await user.click(screen.getByRole('button', { name: /Tambah Baris Pos/i }))
+    await user.type(screen.getByLabelText(/Uraian pos 1/i), 'Meja Rapat Kayu')
 
-    await userEvent.click(screen.getByRole('button', { name: /Buat Pengajuan/i }))
+    await user.click(screen.getByRole('button', { name: /Buat Pengajuan/i }))
 
     await waitFor(() => {
       expect(postSpy).toHaveBeenCalledWith('/api/pengajuan', expect.objectContaining({
@@ -326,6 +327,7 @@ describe('Modul Pengajuan Dana & LPJ', () => {
   })
 
   it('Form edit memuat data lama dan menyimpan via PUT tanpa tenggatLpj', async () => {
+    const user = userEvent.setup({ delay: null })
     vi.spyOn(api, 'get').mockResolvedValue({ data: { data: mockDetailPengajuan } })
     const putSpy = vi.spyOn(api, 'put').mockResolvedValue({ data: { data: mockDetailPengajuan, message: 'Updated' } })
 
@@ -337,10 +339,10 @@ describe('Modul Pengajuan Dana & LPJ', () => {
     // Pastikan tidak ada input tenggatLpj pada form edit
     expect(screen.queryByLabelText(/Tenggat LPJ Awal/i)).not.toBeInTheDocument()
 
-    await userEvent.clear(judulInput)
-    await userEvent.type(judulInput, 'Judul Proposal Baru Telah Direvisi')
+    await user.clear(judulInput)
+    await user.type(judulInput, 'Judul Proposal Baru Telah Direvisi')
 
-    await userEvent.click(screen.getByRole('button', { name: /Simpan Perubahan/i }))
+    await user.click(screen.getByRole('button', { name: /Simpan Perubahan/i }))
 
     await waitFor(() => {
       expect(putSpy).toHaveBeenCalledWith('/api/pengajuan/pengajuan-1', expect.objectContaining({

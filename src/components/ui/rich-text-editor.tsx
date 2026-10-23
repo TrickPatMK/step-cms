@@ -91,9 +91,9 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   }
 
   return (
-    <div className="border rounded-md shadow-sm overflow-hidden bg-white">
+    <div className="border border-slate-300 rounded-lg shadow-sm overflow-hidden bg-white">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 border-b p-2 bg-slate-50">
+      <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 p-2 bg-navy-50/50">
         <Button
           type="button" variant="ghost" size="sm"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -218,7 +218,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
             onClick={() => fileInputRef.current?.click()}
             title="Insert Image"
             disabled={isUploading}
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            className="text-gold-600 hover:text-gold-700 hover:bg-gold-50"
           >
             <ImageIcon size={16} />
           </Button>

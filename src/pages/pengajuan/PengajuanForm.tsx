@@ -126,7 +126,7 @@ export default function PengajuanForm() {
   if (isEdit && detailQuery.isError) {
     return (
       <div className="space-y-4">
-        <Link to="/pengajuan" className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:underline">
+        <Link to="/pengajuan" className="inline-flex items-center gap-1.5 text-sm font-semibold text-gold-700 hover:text-gold-600 hover:underline">
           <ArrowLeft size={16} /> Kembali ke daftar
         </Link>
         <ErrorState message={errorMessage(detailQuery.error)} retry={() => { void detailQuery.refetch() }} />
@@ -144,14 +144,14 @@ export default function PengajuanForm() {
         <div>
           <Link
             to={isEdit ? `/pengajuan/${id}` : '/pengajuan'}
-            className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-gold-700 hover:text-gold-600 hover:underline"
           >
             <ArrowLeft size={16} /> {isEdit ? 'Kembali ke detail' : 'Kembali ke daftar'}
           </Link>
-          <h1 className="mt-2 text-3xl font-extrabold text-slate-900">
+          <h1 className="mt-2 text-3xl font-bold text-navy-950">
             {isEdit ? 'Ubah Pengajuan Dana' : 'Buat Pengajuan Dana Baru'}
           </h1>
-          <p className="mt-1 text-slate-500">
+          <p className="mt-1.5 text-sm text-slate-600">
             {isEdit
               ? 'Ubah informasi proposal atau rincian pos anggaran.'
               : 'Daftarkan proposal pengajuan dana baru dalam status draft.'}
@@ -161,17 +161,17 @@ export default function PengajuanForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
         {/* Data Dasar Pengajuan */}
-        <Card className="rounded-2xl border-slate-200">
+        <Card className="rounded-xl border-slate-200">
           <CardHeader>
-            <CardTitle className="text-lg font-bold">Data Proposal Pengajuan</CardTitle>
-            <p className="text-xs text-slate-500">
+            <CardTitle className="text-lg font-bold text-navy-950">Data Proposal Pengajuan</CardTitle>
+            <p className="text-xs text-slate-600">
               Catatan: Status pengajuan dikendalikan melalui transisi status terpisah dan tidak dapat diubah dari form ini.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label htmlFor="nomor" className="text-sm font-semibold">
+              <div className="space-y-2">
+                <label htmlFor="nomor" className="text-sm font-semibold text-navy-950">
                   Nomor Pengajuan <span className="text-red-600">*</span>
                 </label>
                 <Input
@@ -182,14 +182,14 @@ export default function PengajuanForm() {
                   {...register('nomor')}
                 />
                 {errors.nomor && (
-                  <p id="nomor-error" role="alert" className="text-xs text-red-600">
+                  <p id="nomor-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
                     {errors.nomor.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <label htmlFor="jenis" className="text-sm font-semibold">
+              <div className="space-y-2">
+                <label htmlFor="jenis" className="text-sm font-semibold text-navy-950">
                   Jenis Pengajuan <span className="text-red-600">*</span>
                 </label>
                 <Select id="jenis" aria-invalid={!!errors.jenis} {...register('jenis')}>
@@ -200,15 +200,15 @@ export default function PengajuanForm() {
                   ))}
                 </Select>
                 {errors.jenis && (
-                  <p role="alert" className="text-xs text-red-600">
+                  <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">
                     {errors.jenis.message}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="judul" className="text-sm font-semibold">
+            <div className="space-y-2">
+              <label htmlFor="judul" className="text-sm font-semibold text-navy-950">
                 Judul Pengajuan <span className="text-red-600">*</span>
               </label>
               <Input
@@ -219,15 +219,15 @@ export default function PengajuanForm() {
                 {...register('judul')}
               />
               {errors.judul && (
-                <p id="judul-error" role="alert" className="text-xs text-red-600">
+                <p id="judul-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
                   {errors.judul.message}
                 </p>
               )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label htmlFor="unit" className="text-sm font-semibold">
+              <div className="space-y-2">
+                <label htmlFor="unit" className="text-sm font-semibold text-navy-950">
                   Unit Pengaju <span className="text-red-600">*</span>
                 </label>
                 <Input
@@ -238,14 +238,14 @@ export default function PengajuanForm() {
                   {...register('unit')}
                 />
                 {errors.unit && (
-                  <p id="unit-error" role="alert" className="text-xs text-red-600">
+                  <p id="unit-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
                     {errors.unit.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <label htmlFor="pengajuNama" className="text-sm font-semibold">
+              <div className="space-y-2">
+                <label htmlFor="pengajuNama" className="text-sm font-semibold text-navy-950">
                   Nama Pengaju (Tercetak) <span className="text-red-600">*</span>
                 </label>
                 <Input
@@ -256,7 +256,7 @@ export default function PengajuanForm() {
                   {...register('pengajuNama')}
                 />
                 {errors.pengajuNama && (
-                  <p id="pengajuNama-error" role="alert" className="text-xs text-red-600">
+                  <p id="pengajuNama-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
                     {errors.pengajuNama.message}
                   </p>
                 )}
@@ -264,8 +264,8 @@ export default function PengajuanForm() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="space-y-1.5">
-                <label htmlFor="tahunAnggaran" className="text-sm font-semibold">
+              <div className="space-y-2">
+                <label htmlFor="tahunAnggaran" className="text-sm font-semibold text-navy-950">
                   Tahun Anggaran <span className="text-red-600">*</span>
                 </label>
                 <Input
@@ -276,14 +276,14 @@ export default function PengajuanForm() {
                   {...register('tahunAnggaran')}
                 />
                 {errors.tahunAnggaran && (
-                  <p id="tahunAnggaran-error" role="alert" className="text-xs text-red-600">
+                  <p id="tahunAnggaran-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
                     {errors.tahunAnggaran.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <label htmlFor="estimasiBiaya" className="text-sm font-semibold">
+              <div className="space-y-2">
+                <label htmlFor="estimasiBiaya" className="text-sm font-semibold text-navy-950">
                   Estimasi Biaya Total (Rp) <span className="text-red-600">*</span>
                 </label>
                 <Input
@@ -294,14 +294,14 @@ export default function PengajuanForm() {
                   {...register('estimasiBiaya')}
                 />
                 {errors.estimasiBiaya && (
-                  <p id="estimasiBiaya-error" role="alert" className="text-xs text-red-600">
+                  <p id="estimasiBiaya-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
                     {errors.estimasiBiaya.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <label htmlFor="tanggalProposal" className="text-sm font-semibold">
+              <div className="space-y-2">
+                <label htmlFor="tanggalProposal" className="text-sm font-semibold text-navy-950">
                   Tanggal Proposal
                 </label>
                 <Input id="tanggalProposal" type="date" {...register('tanggalProposal')} />
@@ -309,25 +309,25 @@ export default function PengajuanForm() {
             </div>
 
             {!isEdit && (
-              <div className="space-y-1.5">
-                <label htmlFor="tenggatLpj" className="text-sm font-semibold">
+              <div className="space-y-2">
+                <label htmlFor="tenggatLpj" className="text-sm font-semibold text-navy-950">
                   Tenggat LPJ Awal (Opsional)
                 </label>
                 <Input id="tenggatLpj" type="date" {...register('tenggatLpj')} />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-600">
                   Dapat ditentukan nanti saat persetujuan proposal.
                 </p>
               </div>
             )}
 
             {isEdit && (
-              <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-3 text-xs text-blue-800">
+              <div className="rounded-lg border border-gold-200 bg-gold-50 p-3 text-xs font-medium text-gold-700">
                 Untuk mengubah tenggat LPJ pada pengajuan yang sudah ada, gunakan tombol aksi <strong>Ubah Tenggat LPJ</strong> di halaman detail dengan alasan perubahan tercatat.
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <label htmlFor="catatan" className="text-sm font-semibold">
+            <div className="space-y-2">
+              <label htmlFor="catatan" className="text-sm font-semibold text-navy-950">
                 Catatan Pengajuan (Opsional)
               </label>
               <Textarea
@@ -341,11 +341,11 @@ export default function PengajuanForm() {
         </Card>
 
         {/* Pos Anggaran (RAB vs Realisasi) */}
-        <Card className="rounded-2xl border-slate-200">
+        <Card className="rounded-xl border-slate-200">
           <CardHeader className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-lg font-bold">Rincian Pos Anggaran (RAB & Realisasi)</CardTitle>
-              <p className="text-xs text-slate-500">
+              <CardTitle className="text-lg font-bold text-navy-950">Rincian Pos Anggaran (RAB & Realisasi)</CardTitle>
+              <p className="text-xs text-slate-600">
                 Daftarkan pos belanja proposal (rencana) dan pengeluaran nyata (realisasi bila sudah ada).
               </p>
             </div>
@@ -370,28 +370,28 @@ export default function PengajuanForm() {
           </CardHeader>
           <CardContent className="p-0">
             {fields.length === 0 ? (
-              <div className="p-8 text-center text-sm text-slate-500">
+              <div className="p-8 text-center text-sm text-slate-600">
                 Belum ada rincian pos belanja proposal. Klik tombol <strong>Tambah Baris Pos</strong> di atas untuk menambahkan pos belanja.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-10">No</TableHead>
-                      <TableHead className="min-w-[200px]">Uraian Belanja *</TableHead>
-                      <TableHead className="w-24">Satuan</TableHead>
-                      <TableHead className="w-28">Qty Rencana</TableHead>
-                      <TableHead className="w-36">Harga Rencana</TableHead>
-                      <TableHead className="w-28">Qty Realisasi</TableHead>
-                      <TableHead className="w-36">Harga Realisasi</TableHead>
+                    <TableRow className="bg-slate-50/60">
+                      <TableHead className="w-10 font-semibold text-slate-700">No</TableHead>
+                      <TableHead className="min-w-[200px] font-semibold text-slate-700">Uraian Belanja *</TableHead>
+                      <TableHead className="w-24 font-semibold text-slate-700">Satuan</TableHead>
+                      <TableHead className="w-28 font-semibold text-slate-700">Qty Rencana</TableHead>
+                      <TableHead className="w-36 font-semibold text-slate-700">Harga Rencana</TableHead>
+                      <TableHead className="w-28 font-semibold text-slate-700">Qty Realisasi</TableHead>
+                      <TableHead className="w-36 font-semibold text-slate-700">Harga Realisasi</TableHead>
                       <TableHead className="w-12" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {fields.map((field, index) => (
                       <TableRow key={field.id}>
-                        <TableCell className="text-center font-medium text-slate-400">
+                        <TableCell className="text-center font-medium text-slate-500">
                           {index + 1}
                         </TableCell>
                         <TableCell>
@@ -401,7 +401,7 @@ export default function PengajuanForm() {
                             {...register(`item.${index}.uraian` as const)}
                           />
                           {errors.item?.[index]?.uraian && (
-                            <p role="alert" className="mt-1 text-xs text-red-600">
+                            <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">
                               {errors.item[index]?.uraian?.message}
                             </p>
                           )}
@@ -452,7 +452,7 @@ export default function PengajuanForm() {
                             size="sm"
                             aria-label={`Hapus baris ${index + 1}`}
                             onClick={() => remove(index)}
-                            className="text-red-500 hover:text-red-700"
+                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
                           >
                             <Trash2 size={16} />
                           </Button>
@@ -464,17 +464,17 @@ export default function PengajuanForm() {
               </div>
             )}
 
-            <div className="flex flex-wrap items-center justify-between border-t bg-slate-50 px-6 py-3 text-sm">
-              <span className="font-medium text-slate-600">
+            <div className="flex flex-wrap items-center justify-between border-t border-slate-200 bg-navy-50/40 px-6 py-3.5 text-sm">
+              <span className="font-medium text-slate-700">
                 Total Rencana Pos yang Terinput:
               </span>
-              <span className="font-bold text-slate-900">{formatRupiah(liveTotalRencana)}</span>
+              <span className="font-bold tabular-nums text-navy-950">{formatRupiah(liveTotalRencana)}</span>
             </div>
           </CardContent>
         </Card>
 
         {saveMutation.isError && (
-          <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800">
+          <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-600">
             {errorMessage(saveMutation.error)}
           </p>
         )}
@@ -483,14 +483,15 @@ export default function PengajuanForm() {
         <div className="flex items-center justify-end gap-3">
           <Link
             to={isEdit ? `/pengajuan/${id}` : '/pengajuan'}
-            className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="inline-flex h-11 items-center rounded-lg border border-slate-300 bg-white px-5 text-sm font-semibold text-navy-950 transition-colors hover:border-gold-500 hover:bg-gold-50/30 hover:text-gold-700"
           >
             Batal
           </Link>
           <Button
             type="submit"
+            variant="gold"
             disabled={saveMutation.isPending}
-            className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+            className="px-6 font-semibold"
           >
             {saveMutation.isPending ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Buat Pengajuan'}
           </Button>

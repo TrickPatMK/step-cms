@@ -1,0 +1,73 @@
+{
+  "card": "t_7ac7c7a9",
+  "date": "2026-10-23",
+  "scope": "non-mutating browser observation of credential mode/origin for API-02a B1 decision",
+  "environment": {
+    "cms_origin": "http://localhost:3005",
+    "cms_dev_server": "pre-existing vite dev listener (vite.config.ts server.port=3005, proxy /api -> http://localhost:8000)",
+    "api": "pre-existing local listener http://localhost:8000 (/api/ping -> 200); step-api-node HEAD baa4f5476e22c2f2f4024d57f08d4e381a116aec",
+    "browser": "isolated browser profile (fresh cookie jar), real Chromium via CDP; no screenshots, no storage dumps",
+    "session": "synthetic local admin from step-api-node/.env TEST_ADMIN_* (values never printed, logged or stored); sign-in and sign-out executed so no session left behind",
+    "instrumentation": "XMLHttpRequest/fetch wrapper recording method, path, withCredentials/credentials mode, Authorization-present; CDP Network.requestWillBeSent(+ExtraInfo) for Cookie-present and Origin"
+  },
+  "binding": {
+    "step_cms_head": "4a6f18b64c56b86422268c0f48f2947bba8e8be1",
+    "step_api_head": "baa4f5476e22c2f2f4024d57f08d4e381a116aec",
+    "contract_sha256": "164ec0b9c196c83178a3338d22c380e150f34e915ff35058e79c9bb38ba55fdd",
+    "file_sha256": {
+      "step-cms/src/lib/api.ts": "dcec325d7c0a2b89f8d764eb58118765b8882e4a460c73496a20a6b2ac2d45e2",
+      "step-cms/src/lib/auth.ts": "172260aa34c6e68dc0634cc00b621a6db783f1aa32363073e09620665b79b4cf",
+      "step-cms/src/components/auth-provider.tsx": "8fdbee2c14c0025c02290cec641cb76b9fd74b020d7355e78a4118c5e9273876",
+      "step-cms/vite.config.ts": "fc4308377f21a9e747a6fa31534b3adc8baa38f288c14902c8316274cf5cd085",
+      "step-api-node/src/server.ts": "08357907d8d2b736c1be4a03882a56c92fb6ce480976d6fb430556c657f97a1c",
+      "step-api-node/src/auth/index.ts": "38ade6cb2d23af7d0e3ee81d2f202ab8915a422d11a51a36026784f45e462f66"
+    }
+  },
+  "observations": [
+    {
+      "id": "E1",
+      "what": "CMS login flow deposits a Better Auth httpOnly session cookie",
+      "before": {"cookies_for_origin": 0},
+      "request": {"method": "POST", "path": "/api/auth/sign-in/email", "status": 200, "authorization_present": false},
+      "after": {"cookies_for_origin": 1, "names": ["better-auth.session_token"], "httpOnly": true, "sameSite": "Lax", "secure": false},
+      "note": "clean profile, so the cookie could only come from this sign-in"
+    },
+    {
+      "id": "E2",
+      "what": "authenticated reads carry Authorization AND Cookie at the same time",
+      "samples": [
+        {"method": "GET", "path": "/api/auth/get-session", "authorization_present": true, "cookie_present": true, "origin_header": null, "status": 200},
+        {"method": "GET", "path": "/api/faculty", "authorization_present": true, "cookie_present": true, "origin_header": null, "status": 200},
+        {"method": "GET", "path": "/api/events", "authorization_present": true, "cookie_present": true, "origin_header": null, "status": 200}
+      ],
+      "same_shape_seen_without_header_capture": ["/api/stepnews", "/api/faculty", "/api/events", "/api/facilities (Authorization-present true, status 200, from the client probe)"],
+      "credentials_mode": {"xhr_withCredentials": false, "fetch_credentials": "default"},
+      "note": "requests are same-origin to :3005 and reach the API through the vite dev proxy, so the cookie is attached even with withCredentials=false; no Origin header is sent on same-origin GET"
+    },
+    {
+      "id": "E3",
+      "what": "mutation-shaped request formed by the CMS (sign-out, auth endpoint; no domain mutation sent)",
+      "request": {"method": "POST", "path": "/api/auth/sign-out", "origin": "http://localhost:3005", "authorization_present": true, "cookie_present": true, "referer_present": true, "status": 200, "set_cookie_in_response": true},
+      "note": "browser attaches Origin to same-origin POST as well; mixed Cookie+Bearer is the CMS client's normal shape for fetch/XHR writes"
+    },
+    {
+      "id": "E4",
+      "what": "origin membership in both lists (source, read separately)",
+      "cors_allowedOrigins": {"file": "step-api-node/src/server.ts:46-52", "contains_cms_origin_3005": true, "contains_production": true, "credentials": true, "methods_include_patch": false},
+      "auth_trustedOrigins": {"file": "step-api-node/src/auth/index.ts:44", "contains_cms_origin_3005": true, "contains_production": false},
+      "note": "read requests never exercise the CORS allowlist in dev (same-origin, no Origin header); only non-GET same-origin requests carry Origin, so the trusted list is the binding constraint for B1"
+    }
+  ],
+  "b1_guard_implementation": {"grep_ambiguous_mutation_credentials": 0, "runtime_403_observed": false},
+  "proven": [
+    "CMS login produces an httpOnly cookie in the same browser jar that later sends Authorization, on the same origin",
+    "every authenticated read issued by the CMS carries Cookie + Authorization + Bearer, mixed, status 200 today",
+    "http://localhost:3005 (dev) is in both CORS allowedOrigins and auth trustedOrigins",
+    "https://stepsmg.ac.id is in CORS allowedOrigins but absent from auth trustedOrigins"
+  ],
+  "not_proven": [
+    "no domain mutation, PATCH, preflight, or upload request was sent (B1 is a proposal; no 403 exists to observe)",
+    "production/TLS deployment: secure cookie flag, cross-site SameSite behaviour, and the production CMS->API origin pair were not exercised",
+    "no real student data, no mobile client, no DB/service/credential change; only local dev listeners that were already running were used"
+  ]
+}
